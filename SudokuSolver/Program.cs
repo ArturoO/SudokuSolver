@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SudokuSolver
@@ -10,21 +12,74 @@ namespace SudokuSolver
     {
         static void Main(string[] args)
         {
-            
+           
+            StringBuilder inputSudoku = new StringBuilder("");
+            StringBuilder consoleMessage = new StringBuilder("");
+            consoleMessage.AppendLine("SudokuSolver is an application meant for solving sudoku puzzle.");
+            consoleMessage.AppendLine("You can provide input sudoku by using terminal or providing a file.");
+            consoleMessage.AppendLine("Please choose the way you want to input the puzzle(terminal/file).");
+            consoleMessage.AppendLine("");
+            Console.Write(consoleMessage);
+            string result = Console.ReadLine();
+
+            if(result=="terminal")
+            {
+                consoleMessage.Clear();
+                consoleMessage.AppendLine("Please type input sudoku, unknown fields should have value of 0.");
+                consoleMessage.AppendLine("To proceede to next row, please use enter, make sure to fill all 81 fields.");
+                consoleMessage.AppendLine("");
+                Console.WriteLine(consoleMessage);
+
+                for (int i = 0; i < 9; i++)
+                    inputSudoku.Append(Console.ReadLine());
+
+                consoleMessage.Clear();
+                consoleMessage.AppendLine("Input sudoku is:");
+                consoleMessage.AppendLine(inputSudoku.ToString());
+                Console.WriteLine(consoleMessage);
+            }
+            else if(result=="file")
+            {
+                consoleMessage.Clear();
+                consoleMessage.AppendLine("Please provide the address of a text file with sudoku puzzle.");
+                consoleMessage.AppendLine("");
+                Console.WriteLine(consoleMessage);
+
+                string sudokuFile = Console.ReadLine();
+                if (File.Exists(sudokuFile))
+                {
+                    FileStream fs = new FileStream(sudokuFile, FileMode.Open, FileAccess.ReadWrite);
+                    try
+                    {
+                        StreamReader sr = new StreamReader(fs);
+                        inputSudoku.Append(sr.ReadToEnd());
+                        sr.Close();
+
+                        consoleMessage.Clear();
+                        consoleMessage.AppendLine("Input sudoku is:");
+                        consoleMessage.AppendLine(inputSudoku.ToString());
+                        Console.WriteLine(consoleMessage);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                   
+            }
+            else
+            {
+                consoleMessage.Clear();
+                consoleMessage.AppendLine("Incorrect value, exiting.");
+                Console.WriteLine(consoleMessage);
+                return;
+            }
+
             StringBuilder puzzle = new StringBuilder("");
-            puzzle.Append("200300000");
-            puzzle.Append("804062003");
-            puzzle.Append("013800200");
-            puzzle.Append("000020390");
-            puzzle.Append("507000621");
-            puzzle.Append("032006000");
-            puzzle.Append("020009140");
-            puzzle.Append("601250809");
-            puzzle.Append("000001002");
+            //remove all new line characters from the string
+            puzzle.Append(Regex.Replace(inputSudoku.ToString(), @"\t|\n|\r", ""));
 
 
-            Console.Write(puzzle.ToString());
-            
             Field[][] sudoku = new Field[9][];
             int position = 0;
             for(int i=0; i<9; i++)
