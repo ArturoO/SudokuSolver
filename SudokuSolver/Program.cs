@@ -12,11 +12,10 @@ namespace SudokuSolver
     {
         static void Main(string[] args)
         {
-           
             StringBuilder inputSudoku = new StringBuilder("");
             StringBuilder consoleMessage = new StringBuilder("");
-            consoleMessage.AppendLine("SudokuSolver is an application meant for solving sudoku puzzle.");
-            consoleMessage.AppendLine("You can provide input sudoku by using terminal or providing a file.");
+            consoleMessage.AppendLine("SudokuSolver is an application meant for solving sudoku puzzles.");
+            consoleMessage.AppendLine("You can input a sudoku by using terminal or a text file.");
             consoleMessage.AppendLine("Please choose the way you want to input the puzzle(terminal/file).");
             consoleMessage.AppendLine("");
             Console.Write(consoleMessage);
@@ -32,11 +31,6 @@ namespace SudokuSolver
 
                 for (int i = 0; i < 9; i++)
                     inputSudoku.Append(Console.ReadLine());
-
-                consoleMessage.Clear();
-                consoleMessage.AppendLine("Input sudoku is:");
-                consoleMessage.AppendLine(inputSudoku.ToString());
-                Console.WriteLine(consoleMessage);
             }
             else if(result=="file")
             {
@@ -54,18 +48,12 @@ namespace SudokuSolver
                         StreamReader sr = new StreamReader(fs);
                         inputSudoku.Append(sr.ReadToEnd());
                         sr.Close();
-
-                        consoleMessage.Clear();
-                        consoleMessage.AppendLine("Input sudoku is:");
-                        consoleMessage.AppendLine(inputSudoku.ToString());
-                        Console.WriteLine(consoleMessage);
                     }
                     catch(Exception ex)
                     {
                         Console.WriteLine(ex.Message);
                     }
                 }
-                   
             }
             else
             {
@@ -75,11 +63,18 @@ namespace SudokuSolver
                 return;
             }
 
-            StringBuilder puzzle = new StringBuilder("");
+            consoleMessage.Clear();
+            consoleMessage.AppendLine("Input sudoku is:");
+            consoleMessage.AppendLine(inputSudoku.ToString());
+            Console.WriteLine(consoleMessage);
+
             //remove all new line characters from the string
-            puzzle.Append(Regex.Replace(inputSudoku.ToString(), @"\t|\n|\r", ""));
+            string temp = "";
+            temp = Regex.Replace(inputSudoku.ToString(), @"\t|\n|\r", "");
+            inputSudoku.Clear();
+            inputSudoku.Append(temp);
 
-
+            //Set initial values of the sudoku puzzle based on the text input
             Field[][] sudoku = new Field[9][];
             int position = 0;
             for(int i=0; i<9; i++)
@@ -88,7 +83,7 @@ namespace SudokuSolver
                 for (int j=0; j<9; j++)
                 {
                     position = i * 9 + j;
-                    sudoku[i][j].value = (int)char.GetNumericValue(puzzle[position]);
+                    sudoku[i][j].value = (int)char.GetNumericValue(inputSudoku[position]);
                     if(sudoku[i][j].value>0)
                         sudoku[i][j].changeable = false;
                     else
@@ -97,7 +92,7 @@ namespace SudokuSolver
             }
             Console.WriteLine();
 
-            //start algorithm
+            //Start Algorithm
             int row = 0;
             int col = 0;
             while(true)
@@ -118,16 +113,46 @@ namespace SudokuSolver
             }
 
             //solution was found, display the answer
-            Console.WriteLine();
+            consoleMessage.Clear();
+            consoleMessage.AppendLine("Solved sudoku:");
+            Console.WriteLine(consoleMessage.ToString());
+            StringBuilder outputSudoku = new StringBuilder("");
             for(int i=0; i<9; i++)
             {
                 for (int j = 0; j < 9; j++)
                 {
-                    Console.Write(sudoku[i][j].value);
+                    outputSudoku.Append(sudoku[i][j].value);
+                    //Console.Write(sudoku[i][j].value);
                 }
-                Console.WriteLine();
+                outputSudoku.AppendLine();
+                //Console.WriteLine();
             }
-           
+
+            Console.WriteLine(outputSudoku.ToString());
+
+            consoleMessage.Clear();
+            consoleMessage.AppendLine("Do you want to save the result in the text file?(yes/no)");
+            Console.WriteLine(consoleMessage.ToString());
+            result = Console.ReadLine();
+            if (result == "no")
+                return;
+
+            consoleMessage.Clear();
+            consoleMessage.AppendLine("Specify path for text file:");
+            Console.WriteLine(consoleMessage.ToString());
+            string outputFile = Console.ReadLine();
+            
+            FileStream fs2 = new FileStream(outputFile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            try
+            {
+                StreamWriter sw = new StreamWriter(fs2);
+                sw.Write(outputSudoku.ToString());
+                sw.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         static void IncreaseValue(Field[][] sudoku,ref int row,ref int col)
